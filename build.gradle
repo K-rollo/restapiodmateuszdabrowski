@@ -20,11 +20,39 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '3.0.0'
+	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0'
+
+//	compileOnly group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
+//	compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+
 	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.h2database:h2'
+
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+task generatePostsAndComments() {
+	doLast {
+		File dataSql = file("src/main/resources/data.sql")
+		dataSql.write("")
+
+		for (int i = 1; i <= 100; i++) {
+			dataSql.append("insert into post(id, title, content, created) " +
+			"values (${i}, 'Post testowy nr ${i}', 'Tresc posta nr ${i}', '" + LocalDateTime.now().minusDays(100 - i) + "');\n")
+		}
+
+		for (int i= 1; i <= 100; i++) {
+			int postId = 1 + i / 10
+			dataSql.append("insert into comment(id, post_id, content, created) " +
+			"values (${i}, ${postId}, 'Komentarz nr ${i}', '" + LocalDateTime.now().minusDays(100 - i) + "');\n")
+		}
+	}
 }
